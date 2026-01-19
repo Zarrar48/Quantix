@@ -49,7 +49,7 @@ export default function MarketChart({ data,assetNames }: MarketChartProps) {
         wick: { useFillColor: true },   
       },
        bar: {
-        columnWidth: "10%",}
+        columnWidth: "50%",}
     },
     grid: {
       borderColor: "#334155",

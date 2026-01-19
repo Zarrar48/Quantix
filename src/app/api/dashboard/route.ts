@@ -10,11 +10,16 @@ export async function GET() {
         ORDER BY created_at DESC 
         LIMIT 10
       `),
-
       pool.query(`
+        WITH RankedCandles AS (
+            SELECT symbol, open, high, low, close, timestamp,
+            ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY timestamp DESC) as rn
+            FROM market_candles 
+            WHERE timestamp > NOW() - INTERVAL '7 days' 
+        )
         SELECT symbol, open, high, low, close, timestamp 
-        FROM market_candles 
-        WHERE timestamp > NOW() - INTERVAL '24 hours'
+        FROM RankedCandles
+        WHERE rn <= 50 -- Limit to last 50 candles per asset
         ORDER BY timestamp ASC
       `),
 
@@ -34,33 +39,34 @@ export async function GET() {
     const lastLog = logsResult.rows[0];
     const dailyCount = parseInt(countResult.rows[0].count, 10) || 0;
     const assetList = commoditiesResult.rows;
-    const chartDataBySymbol: Record<string, any[]> = {};
     
+    const chartDataBySymbol: Record<string, any[]> = {};
     const assetNameMap: Record<string, string> = {};
+
     assetList.forEach((asset) => {
       assetNameMap[asset.symbol] = asset.name;
+      chartDataBySymbol[asset.symbol] = []; 
     });
 
     rawCandles.forEach((c) => {
-      if (!chartDataBySymbol[c.symbol]) {
-        chartDataBySymbol[c.symbol] = [];
-      }
-      chartDataBySymbol[c.symbol].push({
-        x: new Date(c.timestamp).getTime(), 
-        y: [
+      if (chartDataBySymbol[c.symbol]) {
+        chartDataBySymbol[c.symbol].push({
+          x: new Date(c.timestamp).getTime(), 
+          y: [
             Number(c.open), 
             Number(c.high), 
             Number(c.low), 
             Number(c.close)
-        ]
-      });
+          ]
+        });
+      }
     });
 
     const latestSig = recentSignals[0];
 
     return NextResponse.json({
       metrics: {
-        activeAssets: Object.keys(chartDataBySymbol).length, 
+        activeAssets: assetList.length,
         lastUpdate: lastLog?.created_at || new Date(),
         systemStatus: lastLog?.level === 'ERROR' ? 'Critical' : 'Operational',
         dailySignalCount: dailyCount,
@@ -81,7 +87,7 @@ export async function GET() {
         time: sig.created_at,
       })),
       
-      chartData: chartDataBySymbol ,
+      chartData: chartDataBySymbol,
       assetNames: assetNameMap
     });
 
