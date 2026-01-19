@@ -141,7 +141,7 @@ export default function SidebarWidget() {
 
       {/* Action Button */}
       <a
-        href="/dashboard"
+        href="/"
         className={`flex w-full items-center justify-center gap-2 rounded-lg p-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 ${btnColor}`}
       >
         View Chart

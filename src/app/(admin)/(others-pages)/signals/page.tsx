@@ -26,12 +26,12 @@ interface TradeSignal {
 const TradeSignalsPage = () => {
   const [signals, setSignals] = useState<TradeSignal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
 const fetchSignals = async () => {
     try {
-      const response = await fetch('/api/signals');
+      const response = await fetch('/api/signals?all=true');
       if (!response.ok) throw new Error('Failed to fetch');
       
       const data = await response.json();
@@ -105,8 +105,8 @@ const fetchSignals = async () => {
              />
            </div>
            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-           <span className="text-xs text-slate-400 px-2">
-             Updated: {lastUpdated.toLocaleTimeString()}
+           <span className="text-xs text-slate-400 px-2 min-w-[80px]" suppressHydrationWarning>
+             Updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "..."}
            </span>
            <button 
              onClick={() => { setIsLoading(true); fetchSignals(); }}

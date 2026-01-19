@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 import { CandleData } from "@/services/dashboardService";
+import { Clock } from "lucide-react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -30,6 +31,10 @@ export default function MarketChart({ data,assetNames }: MarketChartProps) {
   const currentPrice = currentCandle ? currentCandle.y[3] : 0; 
   const previousPrice = activeData.length > 1 ? activeData[activeData.length - 2].y[3] : 0;
   const isPositive = currentPrice >= previousPrice;
+
+  const lastCandleTime = currentCandle ? new Date(currentCandle.x).getTime() : 0;
+  const timeDiff = Date.now() - lastCandleTime;
+  const isMarketOpen = timeDiff < 1000 * 60 * 65;
 
   const options: ApexOptions = {
     chart: {
@@ -100,6 +105,20 @@ export default function MarketChart({ data,assetNames }: MarketChartProps) {
             <h4 className="text-xl font-bold text-black dark:text-white">
               {activeName} Analysis
             </h4>
+            {isMarketOpen ? (
+                 <span className="flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                   <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                    </span>
+                   Market Open
+                 </span>
+              ) : (
+                 <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                   <Clock className="h-3 w-3" />
+                   Market Closed
+                 </span>
+              )}
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-black dark:text-white">
                 ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}

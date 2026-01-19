@@ -1,8 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server"; // Import NextRequest
 import pool from "@/lib/db";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const showAll = searchParams.get('all');
+
+    if (showAll) {
+
+      const result = await pool.query(`
+        SELECT 
+          t.id,
+          t.symbol, 
+          t.signal_type, 
+          t.strength, 
+          t.reason,
+          t.trigger_price, 
+          t.created_at
+        FROM trade_signals t
+        ORDER BY t.created_at DESC 
+        LIMIT 50
+      `);
+      
+      return NextResponse.json(result.rows);
+    } 
     const result = await pool.query(`
       SELECT 
         t.symbol, 
@@ -33,7 +54,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error("Signal Widget API Error:", error);
+    console.error("Signal API Error:", error);
     return NextResponse.json({ error: "Failed to fetch signal" }, { status: 500 });
   }
 }
