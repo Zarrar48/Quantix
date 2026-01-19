@@ -34,7 +34,7 @@ export default function MarketChart({ data,assetNames }: MarketChartProps) {
 
   const lastCandleTime = currentCandle ? new Date(currentCandle.x).getTime() : 0;
   const timeDiff = Date.now() - lastCandleTime;
-  const isMarketOpen = timeDiff < 1000 * 60 * 65;
+  const isMarketOpen = timeDiff < 1000 * 60 * 125;
 
   const options: ApexOptions = {
     chart: {
