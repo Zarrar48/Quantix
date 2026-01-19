@@ -85,22 +85,21 @@ const AppHeader: React.FC = () => {
           </button>
 
           {/* Mobile Logo */}
-          <Link href="/" className="lg:hidden">
-            <Image
-              width={154}
-              height={32}
-              className="dark:hidden"
-              src="/images/logo/logo.png"
-              alt="Logo"
-            />
-            <Image
-              width={154}
-              height={32}
-              className="hidden dark:block"
-              src="/images/logo/logo-dark.png"
-              alt="Logo"
-            />
-          </Link>
+          <Link 
+          href="/" 
+          className="flex items-center justify-center gap-3 py-2 lg:hidden"
+        >
+            <>
+              <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-sm">
+                <Image
+                  src="/images/logo/logo-icon.png"
+                  alt="Quantix Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </>
+        </Link>
 
           {/* Mobile Menu Toggler */}
           <button
